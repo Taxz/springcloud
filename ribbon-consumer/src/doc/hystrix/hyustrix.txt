@@ -1,0 +1,64 @@
+1.创建HyStrixCommmand和HystrixObservableCommand,采用命令模式实现对服务调用操作的封装，前者返回单个操作结果，后者返回多个操作结果，
+2.命令执行
+    HyStrixCommand执行方式：
+    execute():同步执行，从依赖的服务返回一个单一的结果对象，或是发生错误时抛出异常，
+        queue.get();
+        通过调用queue()返回的Future<R>对象的get方法来实现同步执行的，该方法会等到任务执行结束，然后获得R类型的结果进行返回；
+    queue():异步执行，直接返回Futura对象，其中包含服务执行结束时，要返回的单一结果对象，
+        Observable<R> o =  toObservable();
+        Future<R> f = o.toBlocking().toFuture();
+        通过toObservable获得一个Cold Observable，并通过toblocking()将改Observable转换为BlockingObservable，把数据以组撒的方式发射出来，tofuture方法将BlockingObservable转化成一个Future对象返回，并不阻塞；
+
+    HyStrixObservableCommand执行方式：
+    observe():返回Observable对象，代表了操作的多个结果，是一个Hot Observable(不论事件源，是否有订阅者，都会在事件创建后进行发布，订阅者有可能看到的是局部);
+    toObservable():也返回Observable对象，代表操作的多个结果，Cold Observable(在没有订阅者的时候不会对事件进行发布,而是进行等待，直到有订阅者才发布事件，订阅者看到的是完整的);
+
+3.结果是否缓存
+    若当前命令的缓存功能是被启用的，并且该命令缓存命中，缓存结果会立即以Observable对象的形式返回，
+
+4.断路器是否打开
+    在命令结果没有缓存命中的时候，HyStrix在执行命令前需要检查断路器是否为打开状态；
+    如果是打开的，HyStrix不会执行，直接跳转到fallback处理逻辑
+    如果是关闭的，HyStrix会检查是否有资源来执行命令
+
+5.线程池、请求队列、信号量是否占满
+    线程池并非容器的线程池，而是每个依赖服务的专有线程池，HyStrix为了保证不会因为某个依赖服务的问题影响到其他服务依赖而采用了“舱壁模式”来隔离每个依赖的服务，
+    如果占满，HyStrix不会执行，而是转接到fallback处理逻辑，
+
+6.HyStrixObservableCommand.construct()或HyStrixCommand.run()
+    Hystix根据我们编写的方法来决定采取设么样的方式请求依赖服务
+    HyStrixObservableCommand.construct() 返回一个Observable对象来发射多个结果，或是通过onError发送错误通知，
+    HyStrixCommand.run():返回一个单一的结果，或者是抛出异常，
+
+    如果run()或construct()方法的执行时间超过了命令设置的超时阈值，当前处理线程会抛出一个TimeExeception异常，转接到fallback处理逻辑，如果当前命令没有被取消或者中断，那么他最终会忽略run()或者construct()方法返回，
+    如果命令没有抛出异常并返回了结果，那么HyStrix  会记录一些日志并采集监控报告之后将该结果返回，
+
+7.计算断路器的健康度
+   HyStrix会将成功、失败、拒绝、超时等信息报给断路器，而断路器会维护一组计数器来统计这些数据
+   断路器会使用这些统计数据来决定是否要打开断路器，来对某个 依赖服务的请求进行“熔断、短路”，直到恢复期结束，若在恢复期结束后，根据统计数据判断如果还没有达到健康指标，就再次“熔断、短路”
+
+8.fallback处理
+
+    当命令执行失败的时候，HyStrix会进入fallback尝试回退处理，也称“服务降级” ，出现服务降级有一下三种情况，
+    1.当前命令处于“短路、熔断”状态，断路器是打开的，
+    2.当前命令的线程池、请求队列、信号量被沾满的时候；
+    3.HyStrixObservableCommand.construct()或HyStrixCommand.run()抛出异常的时候，
+
+9.返回成功的响应
+
+
+断路器打开验证：
+
+isOpen():
+    如果他的请求总数QPS在预设的阈值范围内就返回false，表示断路器处于未打开状态，默认值为20，circuitBreakerRequestVolumeThreshold，
+    如果错误百分比在阈值范围内就返回false，表示断路器未打开，默认值 50
+
+    如果以上两个条件都不满足，则将断路器设置为打开状态，并记录的当前时间值
+
+alllowSingleTest():
+    判断断路器打开的时间+休眠时间 是否小于当前时间，如果是，则允许此次访问，称为“半开”状态，若请求成功则断路器重新打开，请求成功则关闭，实现断路器的打开与关闭
+
+
+
+线程隔离：
+    舱壁模式，线程池和信号量(不能设置超时和实现异步访问，只能在依赖服务足够可靠的情况下);
