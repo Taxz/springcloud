@@ -16,7 +16,7 @@ public class HelloService {
     @Autowired
     RestTemplate restTemplate;
 
-    @HystrixCommand(ignoreExceptions = {IOException.class},fallbackMethod = "fallback" )
+    @HystrixCommand(ignoreExceptions = {IOException.class},fallbackMethod = "fallback",commandKey = "helloService",groupKey = "hello",threadPoolKey = "helloServiceThreadPoolKey")
     public String helloService() {
         return restTemplate.getForEntity("http://HELLO-SERVICE/hello",String.class).getBody();
     }
