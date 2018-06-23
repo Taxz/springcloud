@@ -18,6 +18,8 @@ public class HelloService {
 
     @HystrixCommand(ignoreExceptions = {IOException.class},fallbackMethod = "fallback",commandKey = "helloService",groupKey = "hello",threadPoolKey = "helloServiceThreadPoolKey")
     public String helloService() {
+         //getForEntity 返回的是ResponseEntity，是对HTTP请求响应的封装，
+        //getForObject 对getForEntity的进一步封装，
         return restTemplate.getForEntity("http://HELLO-SERVICE/hello",String.class).getBody();
     }
 
