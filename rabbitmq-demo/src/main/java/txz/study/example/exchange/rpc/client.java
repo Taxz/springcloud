@@ -28,18 +28,24 @@ public class client {
     }
 
     public String call(String message) throws IOException, InterruptedException {
+
+        //唯一Id，做处理完响应判断
         final String corrId = UUID.randomUUID().toString();
 
+        //响应队列和Id
         AMQP.BasicProperties properties = new AMQP.BasicProperties
                 .Builder()
                 .correlationId(corrId)
                 .replyTo(replyQueueName)
                 .build();
 
+        //发布消息
         channel.basicPublish("", requestQueueName, properties, message.getBytes("UTF-8"));
 
+        //利用阻塞队列接受响应结果
         final BlockingQueue<String> response = new ArrayBlockingQueue<String>(1);
 
+        //处理响应结果
         channel.basicConsume(replyQueueName,true,new DefaultConsumer(channel){
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {

@@ -27,8 +27,10 @@ public class server {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
+        //队列绑定
         channel.queueDeclare(requestQueueName, false, false, false, null);
 
+        //处理完上一条消息，才会发送新消息
         channel.basicQos(1);
 
         System.out.println("wait .....");
@@ -48,7 +50,11 @@ public class server {
                     System.out.println("receive message:" + num + " starte fibonaci");
                     response += fib(num);
                 }finally {
+
+                    //返回处理结果
                     channel.basicPublish("", properties.getReplyTo(), properties1, response.getBytes("UTF-8"));
+
+                    //发送消息处理完确认
                     channel.basicAck(envelope.getDeliveryTag(), false);
                     synchronized (this) {
                         this.notify();
