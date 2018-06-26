@@ -3,6 +3,7 @@ package txz.study.example.workqueue;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.MessageProperties;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -12,15 +13,15 @@ import java.util.concurrent.TimeoutException;
  */
 public class NewTask {
 
-    private static String getMessage(String[] args) {
-        if (args.length < 1) {
+    public static String getMessage(String[] args) {
+        if (args.length < 2) {
             return "hello world!";
         }
 
         return joinString(args," ");
     }
 
-    private static String joinString(String[] args, String s) {
+    public static String joinString(String[] args, String s) {
 
         int length = args.length;
         if (length == 0) {
@@ -47,10 +48,13 @@ public class NewTask {
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
+        //持久化
+        boolean durable = true;
         //declare a queue for us to send to; then we can publish a message to the queue:
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        channel.queueDeclare(QUEUE_NAME, durable, false, false, null);
         String message = getMessage(new String[]{"Fifth message..............."});
-        channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
+        //持久化
+        channel.basicPublish("", QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message.getBytes());
         System.out.println("[x] sent " + message);
 
         // close the channel and the connection

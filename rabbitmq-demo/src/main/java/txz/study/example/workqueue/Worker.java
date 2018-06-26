@@ -19,7 +19,14 @@ public class Worker {
         factory.setPassword("admin");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+
+        //持久化
+        boolean durable = true;
+
+        channel.queueDeclare(QUEUE_NAME, durable, false, false, null);
+
+        //处理完上一条信息，才会发送新信息；
+        channel.basicQos(1);
 
         System.out.println("[*] Waiting for message To exit Ctri+C");
 
@@ -34,11 +41,15 @@ public class Worker {
                     e.printStackTrace();
                 } finally {
                     System.out.println("[x] Done");
+                    //消费信息确认
                     channel.basicAck(envelope.getDeliveryTag(), false);
                 }
             }
         };
-        channel.basicConsume(QUEUE_NAME, true, consumer);
+
+        //取消自动确认
+        boolean autoack = false;
+        channel.basicConsume(QUEUE_NAME, autoack, consumer);
     }
 
     private static void doWork(String message) throws InterruptedException {
