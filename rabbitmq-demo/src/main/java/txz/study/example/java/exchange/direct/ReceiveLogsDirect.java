@@ -1,4 +1,4 @@
-package txz.study.example.exchange.fanout;
+package txz.study.example.java.exchange.direct;
 
 import com.rabbitmq.client.*;
 
@@ -8,32 +8,37 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by Administrator on 2018/6/26.
  */
-public class ReceiveLogs {
-    private static final String EXCHANGE_NAME = "logs";
+public class ReceiveLogsDirect {
+    private static String EXCHANGE_NAME = "direct_logs";
 
     public static void main(String[] args) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
+
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
 
-        //交换器
-        channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        channel.exchangeDeclare(EXCHANGE_NAME, "direct");
 
         String queueName = channel.queueDeclare().getQueue();
 
-        channel.queueBind("", EXCHANGE_NAME, "");
-        System.out.println(" [*] waiting for message:");
+        String[] arg = new String[]{"info","warning","error"};
+        for (String servertity : arg) {
+            channel.queueBind(queueName, EXCHANGE_NAME, servertity);
+
+        }
+
+        System.out.println("wait......");
+
         Consumer consumer = new DefaultConsumer(channel){
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
                 String message = new String(body, "UTF-8");
-                System.out.println("[x] Received " + message);
-
+                System.out.println("[x] Receiverd: " + envelope.getRoutingKey() + ":" + message);
             }
         };
 
-        channel.basicConsume(queueName, true, consumer);
+        channel.basicConsume(queueName,true,consumer);
     }
 }

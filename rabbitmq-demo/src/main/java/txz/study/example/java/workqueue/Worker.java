@@ -1,4 +1,4 @@
-package txz.study.example.workqueue;
+package txz.study.example.java.workqueue;
 
 import com.rabbitmq.client.*;
 

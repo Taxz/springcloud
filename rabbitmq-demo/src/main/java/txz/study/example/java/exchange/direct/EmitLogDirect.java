@@ -1,10 +1,10 @@
-package txz.study.example.exchange.direct;
+package txz.study.example.java.exchange.direct;
 
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import txz.study.example.workqueue.NewTask;
+import txz.study.example.java.workqueue.NewTask;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;

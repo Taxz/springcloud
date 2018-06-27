@@ -1,9 +1,8 @@
-package txz.study.example.sender;
+package txz.study.example.java.first;
 
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -12,6 +11,7 @@ import java.util.concurrent.TimeoutException;
  * Created by Administrator on 2018/6/25.
  */
 public class Sender {
+
     //Set up the class and name the queue:
     private final static String QUEUE_NAME = "hello_taa";
 

@@ -1,0 +1,28 @@
+#tut1 hello world profile
+#spring:
+#  profiles:
+#    active: usage_message,tut1,sender,receiver
+
+#spring: work queue
+#  profiles:
+#    active: usage_message,tut2,sender,receiver
+
+#spring: pub sub
+#  profiles:
+#    active: usage_message,tut3,sender,receiver
+
+#spring:  Routing
+#  profiles:
+#    active: usage_message,tut4,sender,receiver
+
+#spring: topic
+#  profiles:
+#    active: usage_message,tut5,sender,receiver
+
+spring:
+  profiles:
+    active: usage_message,tut6,client,server
+
+tutorial:
+  client:
+   duration:10000

@@ -1,4 +1,4 @@
-package txz.study.example.exchange.rpc;
+package txz.study.example.java.rpc;
 
 
 import com.rabbitmq.client.*;

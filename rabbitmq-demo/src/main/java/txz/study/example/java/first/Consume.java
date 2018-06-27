@@ -1,4 +1,4 @@
-package txz.study.example.exchange.topic;
+package txz.study.example.java.first;
 
 import com.rabbitmq.client.*;
 
@@ -6,36 +6,30 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 /**
- * Created by Administrator on 2018/6/26.
+ * Created by Administrator on 2018/6/25.
  */
-public class ReceiveLogsTopic {
-    private static final String TOPIC_NAME = "topic_logs";
+public class Consume {
+    private final static String QUEUE_NAME = "task_queue";
 
     public static void main(String[] args) throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
+        factory.setPort(5672);
+        factory.setUsername("admin");
+        factory.setPassword("admin");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
-        channel.exchangeDeclare(TOPIC_NAME, BuiltinExchangeType.TOPIC);
+        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
-        String queueName = channel.queueDeclare().getQueue();
-
-        String[] arg = new String[]{"topic1.#"};
-        for (String bindingKey : arg) {
-            channel.queueBind(queueName, TOPIC_NAME, bindingKey);
-
-        }
-
-        System.out.println("waiting ......");
+        System.out.println("[*] Waiting for message To exit Ctri+C");
 
         Consumer consumer = new DefaultConsumer(channel){
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
                 String message = new String(body, "UTF-8");
-                System.out.println("receive:"+envelope.getRoutingKey()+":"+message);
+                System.out.println("recevice message:"+message);
             }
         };
-
-        channel.basicConsume(queueName, true, consumer);
+        channel.basicConsume(QUEUE_NAME,true,consumer);
     }
 }
