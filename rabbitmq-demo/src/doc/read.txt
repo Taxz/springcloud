@@ -1,0 +1,68 @@
+(Consumer) Delivery Acknowledgements：消费确认
+    RabbitMQ发送消息给消费者，它需要考虑消息是否成功发送，在AMQP 0-9-1中，当一个消费者使用basic.consumer方法注册或通过basic.get方法取到一个消息时会生成 “消费确认”；
+
+    When RabbitMQ delivers a message to a consumer, it needs to know when to consider the message to be successfully sent.
+    In AMQP 0-9-1 it is made when a consumer is registered using the ‘basic.consume’ method or a message is fetched on demand with the basic.get method.
+
+Delivery Identifiers: Delivery Tags 传递标识
+    消费者注册后，通过使用RabbitMQ的basic.deliver方法传递消息，该方法会携带一个传递标识，是在通道中的唯一标识，起作用范围也在每个通道中，
+    发送标识是一个单调递增的正数并且由客户端库提供，确认传递的客户端方法将传递标识作为一个参数，
+
+    When a consumer (subscription) is registered, messages will be delivered (pushed) by RabbitMQ using the basic.deliver method.
+    The method carries a delivery tag, which uniquely identifies the delivery on a channel. Delivery tags are therefore scoped per channel.
+
+
+Consumer Acknowledgement Modes and Data Safety Considerations
+    手动确认可以消极和积极的，通过以下方式：
+
+    basic.ack:积极确认，已发送的消息假设都成功处理了，可以被删除。
+        java客户端通过Channel.basicAck来实现basic.ack，
+
+        channel.basicAck(deliveryTag, false);
+        false :positively acknowledge a single delivery, the message will be discarded;只确认一个传递信息，并且可以删除。
+        true :positively acknowledge all deliveries up to this delivery tag; 确认了这个传递标签中所有的传递信息，
+
+
+    basic.nack：消极确认，消息没有处理也可以删除，
+        java客户端通过Channel.basicNack来实现basic.nack，
+
+        void basicNack​(long deliveryTag,
+                       boolean multiple,
+                       boolean requeue)
+
+       deliveryTag - the tag from the received AMQP.Basic.GetOk or AMQP.Basic.Deliver
+       multiple - true to reject all messages up to and including the supplied delivery tag; false to reject just the supplied delivery tag.
+       requeue - true if the rejected message(s) should be requeued rather than discarded/dead-lettered
+
+
+    basic.reject：消极确认
+        channel.BasicReject(ea.DeliveryTag, false);
+        false : negatively acknowledge, the message will be discarded;被删除，
+        true : requeue the delivery;将重新排队，
+
+
+   String basicConsume​(String queue,
+                       boolean autoAck,
+                       Consumer callback)
+
+         queue - the name of the queue
+         autoAck - true if the server should consider messages acknowledged once delivered; 即发即忘，
+                   false if the server should expect explicit acknowledgements；显示手动确认，
+         callback - an interface to the consumer object；
+
+
+
+Consumer Prefetch：消费者的欲取值
+        basicQos​(int prefetchCount)
+        prefetchCount - maximum number of messages that the server will deliver, 0 if unlimited
+
+
+PRECONDITION_FAILED - unknown delivery tag 100 异常：
+         client acknowledge the same delivery tag more than once
+
+Publisher Confirms 发布者确认
+        问题：丢包，延迟 问题
+        可以用事务，但是降低吞吐量250倍
+
+
+

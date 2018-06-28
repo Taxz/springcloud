@@ -41,13 +41,13 @@ public class Worker {
                     e.printStackTrace();
                 } finally {
                     System.out.println("[x] Done");
-                    //消费信息确认
+                    //积极确认
                     channel.basicAck(envelope.getDeliveryTag(), false);
                 }
             }
         };
 
-        //取消自动确认
+        //默认为false，开启手动确认模式，true，表示关闭，
         boolean autoack = false;
         channel.basicConsume(QUEUE_NAME, autoack, consumer);
     }
