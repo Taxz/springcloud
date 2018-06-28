@@ -60,9 +60,21 @@ Consumer Prefetch：消费者的欲取值
 PRECONDITION_FAILED - unknown delivery tag 100 异常：
          client acknowledge the same delivery tag more than once
 
+When Consumers Fail or Lose Connection: Automatic Requeueing
+         当在手动确认时，传递消息没有确认需要重新排队时发生异常（tcp连接断开、消费者失败，通道协议异常），可以通过设置redeliver为true，第一次传递时设置为false，
 Publisher Confirms 发布者确认
         问题：丢包，延迟 问题
-        可以用事务，但是降低吞吐量250倍
+        方式1，可以用事务，但是降低吞吐量250倍
+        方式2，confirm mode,客户端发送confirm.select方法，依赖是否设置 no-wait，broker可能会响应confirm.select-ok，一旦confirm.select被用在通道上
+        就被称为confirm mode，事务通道不能进入confirm mode，且confirm mode不能用事务，
+        一旦通道是confirm mode，broke和client 都开始从第一次用confirm.select 从1开始计数统计消息，在同一个通道中，
+        broker confirm message 通过 basic.ack处理的消息，delivery-tag 包含confirm message的数量， basic.ack的multiple表示一个或多个，
+
+
+Negative Acknowledgments for Publishes
+        在特殊情况下，broker无法正常成功处理消息时，会发送一个basic.nack，
+        通道进入确认模式后，所有随后发布的消息都将被确认或删除一次。 无法保证消息的确认时间。 没有消息将被确认且nack'd。
+        只有在负责队列的Erlang进程中发生内部错误时才会传递basic.nack。
 
 
 
