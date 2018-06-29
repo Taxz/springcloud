@@ -6,14 +6,14 @@
 
 Delivery Identifiers: Delivery Tags 传递标识
     消费者注册后，通过使用RabbitMQ的basic.deliver方法传递消息，该方法会携带一个传递标识，是在通道中的唯一标识，起作用范围也在每个通道中，
-    发送标识是一个单调递增的正数并且由客户端库提供，确认传递的客户端方法将传递标识作为一个参数，
+    传递标识是一个单调递增的正数并且由客户端库提供，确认传递的客户端方法将传递标识作为一个参数，
 
     When a consumer (subscription) is registered, messages will be delivered (pushed) by RabbitMQ using the basic.deliver method.
     The method carries a delivery tag, which uniquely identifies the delivery on a channel. Delivery tags are therefore scoped per channel.
 
 
 Consumer Acknowledgement Modes and Data Safety Considerations
-    手动确认可以消极和积极的，通过以下方式：
+    手动确认分为消极和积极的，通过以下方式：
 
     basic.ack:积极确认，已发送的消息假设都成功处理了，可以被删除。
         java客户端通过Channel.basicAck来实现basic.ack，
@@ -62,6 +62,8 @@ PRECONDITION_FAILED - unknown delivery tag 100 异常：
 
 When Consumers Fail or Lose Connection: Automatic Requeueing
          当在手动确认时，传递消息没有确认需要重新排队时发生异常（tcp连接断开、消费者失败，通道协议异常），可以通过设置redeliver为true，第一次传递时设置为false，
+
+
 Publisher Confirms 发布者确认
         问题：丢包，延迟 问题
         方式1，可以用事务，但是降低吞吐量250倍
@@ -75,6 +77,26 @@ Negative Acknowledgments for Publishes
         在特殊情况下，broker无法正常成功处理消息时，会发送一个basic.nack，
         通道进入确认模式后，所有随后发布的消息都将被确认或删除一次。 无法保证消息的确认时间。 没有消息将被确认且nack'd。
         只有在负责队列的Erlang进程中发生内部错误时才会传递basic.nack。
+
+When Will Published Messages Be Confirmed by the Broker?
+        对于没有路由的消息，交换器在找不到任何队列时，broker将会发出确认，如果消息也是强制发布的，basic.return会在basic.ack之前发送给客户端，basic.nack也是如此。
+
+        有路由的消息，当所有队列都接受消息时，会发送basic.ack，
+
+Ack Latency for Persistent Messages：持久化消息异步延时
+        持久化消息路由到持久队列，在持久化到磁盘之后才发送basic.ack,RabbitMQ间隔一定时间批量持久化消息到磁盘或者在队列空闲的时候，这意味着在固定的负载下，
+        basic.ack的延迟可能达到几百毫秒，为提高吞吐量可采用程序异步确认（as a stream ）或者批量发布消息，并等待确认；
+
+Ordering Considerations for Publisher Confirms：
+        在大多数情况下，RabbitMQ将按发布顺序向发布商确认消息（这适用于在单个频道上发布的消息）。 但是，发布者确认是异步发出的，并且可以确认一条消息或一组消息。
+        发出确认的确切时刻取决于消息的传递模式（持久性与瞬态）以及消息被路由到的队列的属性（请参见上文）。 也就是说不同的消息可以被认为准备好在不同的时间进行确认。
+        这意味着，与各自的消息相比，确认可以以不同的顺序到达。 应用程序应尽可能不取决于确认的顺序。
+
+
+        如果代理在消息写入磁盘之前崩溃，代理将丢失持久性消息。 在某些情况下，这会导致经纪人以令人惊讶的方式行事。
+
+Delivery tag：
+        递送标签是一个64位长的值，因此其最大值为9223372036854775807.由于递送标签的范围是按每个通道划分的，因此发布商或消费者在实践中不太可能超过该值。
 
 
 
