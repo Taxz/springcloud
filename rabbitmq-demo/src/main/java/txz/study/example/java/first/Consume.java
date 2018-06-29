@@ -19,6 +19,8 @@ public class Consume {
         factory.setPassword("admin");
         Connection connection = factory.newConnection();
         Channel channel = connection.createChannel();
+
+        //队列名 幂等性 不存在就创建
         channel.queueDeclare(QUEUE_NAME, false, false, false, null);
 
         System.out.println("[*] Waiting for message To exit Ctri+C");
@@ -30,6 +32,7 @@ public class Consume {
                 System.out.println("recevice message:"+message);
             }
         };
+        //队列名和发送队列名一致，
         channel.basicConsume(QUEUE_NAME,true,consumer);
     }
 }

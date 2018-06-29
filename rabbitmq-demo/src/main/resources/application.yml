@@ -22,7 +22,18 @@
 spring:
   profiles:
     active: usage_message,tut6,client,server
+  rabbitmq:
+    publisher-confirms: true
+    publisher-returns: true
+    listener:
+      direct:
+        acknowledge-mode: manual
+      simple:
+        acknowledge-mode: manual
+
 
 tutorial:
   client:
-   duration:10000
+   duration: 10000
+
+

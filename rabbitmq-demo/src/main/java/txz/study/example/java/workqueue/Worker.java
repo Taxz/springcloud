@@ -22,7 +22,14 @@ public class Worker {
 
         //持久化
         boolean durable = true;
-
+        //生产者可以不用队列
+        /**
+         * queue - the name of the queue
+         * durable - true if we are declaring a durable queue (the queue will survive a server restart)
+         * exclusive - true if we are declaring an exclusive queue (restricted to this connection) true：独占队列
+         * autoDelete - true if we are declaring an autodelete queue (server will delete it when no longer in use)
+         * arguments - other properties (construction arguments) for the queue
+         */
         channel.queueDeclare(QUEUE_NAME, durable, false, false, null);
 
         //处理完上一条信息，才会发送新信息；
@@ -47,8 +54,8 @@ public class Worker {
             }
         };
 
-        //默认为false，开启手动确认模式，true，表示关闭，
         boolean autoack = false;
+        //true 自动确认模式，消息发送后，认为成功并可删除, false 表示手动确认删除，
         channel.basicConsume(QUEUE_NAME, autoack, consumer);
     }
 

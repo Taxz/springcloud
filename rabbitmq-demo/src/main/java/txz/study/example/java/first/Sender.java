@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException;
 public class Sender {
 
     //Set up the class and name the queue:
-    private final static String QUEUE_NAME = "hello_taa";
+    private final static String QUEUE_NAME = "task_queue";
 
     public static void main(String[] args) throws IOException, TimeoutException {
 
@@ -27,8 +27,12 @@ public class Sender {
         Channel channel = connection.createChannel();
 
         //declare a queue for us to send to; then we can publish a message to the queue:
-        channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        //channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         String message = "hello Rabbit";
+        /*
+         *使用默认的交换器 AMQP default，路由key为队列名
+         * with a routing key equal to the queue name
+         */
         channel.basicPublish("", QUEUE_NAME, null, message.getBytes());
         System.out.println("[x] sent " + message);
 

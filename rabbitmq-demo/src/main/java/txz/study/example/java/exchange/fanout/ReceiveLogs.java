@@ -18,11 +18,12 @@ public class ReceiveLogs {
         Channel channel = connection.createChannel();
 
         //交换器
-        channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+        channel.exchangeDeclare(EXCHANGE_NAME, BuiltinExchangeType.FANOUT);
 
+        //队列用完自动删除
         String queueName = channel.queueDeclare().getQueue();
 
-        channel.queueBind("", EXCHANGE_NAME, "");
+        channel.queueBind(queueName, EXCHANGE_NAME, "");
         System.out.println(" [*] waiting for message:");
         Consumer consumer = new DefaultConsumer(channel){
             @Override

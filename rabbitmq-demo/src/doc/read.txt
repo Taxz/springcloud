@@ -100,3 +100,5 @@ Delivery tag：
 
 
 
+声明一个队列是幂等的，如果不存在就重新创建，channel.queueDeclare(QUEUE_NAME, false, false, false, null);
+        Declaring a queue is idempotent - it will only be created if it doesn't exist already. The message content is a byte array,
