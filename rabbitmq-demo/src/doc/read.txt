@@ -1,3 +1,9 @@
+生产者：将信息发送给交换机或队列；
+交换器：与队列进行绑定，根据关键字路由，
+消费者：根据队列进行消费
+
+
+
 (Consumer) Delivery Acknowledgements：消费确认
     RabbitMQ发送消息给消费者，它需要考虑消息是否成功发送，在AMQP 0-9-1中，当一个消费者使用basic.consumer方法注册或通过basic.get方法取到一个消息时会生成 “消费确认”；
 

@@ -5,10 +5,12 @@ import org.springframework.amqp.core.Message;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by Administrator on 2018/6/27.
  */
+@Service
 public class ConfirmSender implements RabbitTemplate.ReturnCallback{
 
     @Autowired
@@ -20,7 +22,7 @@ public class ConfirmSender implements RabbitTemplate.ReturnCallback{
     int dots = 0;
     int count = 0;
 
-    @Scheduled(fixedDelay = 1000, initialDelay = 500)
+    @Scheduled(fixedDelay = 10000, initialDelay = 500)
     public void send() {
         StringBuilder sb = new StringBuilder();
 
@@ -28,14 +30,18 @@ public class ConfirmSender implements RabbitTemplate.ReturnCallback{
             dots = 1;
         }
 
-        for (int i=0;i<dots;i++) {
+        /*for (int i=0;i<dots;i++) {
             sb.append(".");
-        }
+        }*/
 
         sb.append(Integer.toString(++count));
         String message = sb.toString();
 
+        //        开启returncallback     yml 需要 配置    publisher-returns: true
+        this.rabbitTemplate.setMandatory(true);
         this.rabbitTemplate.setReturnCallback(this);
+
+        //        消息确认  yml 需要配置   publisher-returns: true
         this.rabbitTemplate.setConfirmCallback(((correlationData, ack, cause) -> {
             if (!ack) {
                 System.out.println(" message send fail!,casue:" + cause + " correlationData :" + correlationData);
@@ -44,7 +50,7 @@ public class ConfirmSender implements RabbitTemplate.ReturnCallback{
             }
         }));
 
-        rabbitTemplate.convertAndSend(fanout.getName(),message);
+        rabbitTemplate.convertAndSend(fanout.getName(),"",message);
         System.out.println("sent: "+message);
     }
 

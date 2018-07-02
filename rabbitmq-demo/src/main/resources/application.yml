@@ -18,22 +18,32 @@
 #spring: topic
 #  profiles:
 #    active: usage_message,tut5,sender,receiver
-
+#
 spring:
   profiles:
-    active: usage_message,tut6,client,server
+    active: usage_message,ack
   rabbitmq:
+  #   支持发布确认
     publisher-confirms: true
+  #   支持发布返回
     publisher-returns: true
     listener:
       direct:
         acknowledge-mode: manual
       simple:
+#       手动确认模式
         acknowledge-mode: manual
+#        当前监听容器数
+        concurrency: 1
+#        最大数
+        max-concurrency: 1
+#        是否支持重试
+        retry:
+          enabled: true
 
 
-tutorial:
-  client:
-   duration: 10000
+#tutorial:
+#  client:
+#   duration: 10000
 
 
