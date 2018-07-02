@@ -28,7 +28,7 @@ public class Tut6Config {
 
     @Profile("server")
     private static class ServerConfig {
-
+        //Exchange(tut.rpc) <---    RouteKey(rpc)    ---> Queue(tut.rpc.requests)
         @Bean
         public Queue queue() {
             return new Queue("tut.rpc.requests");
