@@ -37,11 +37,11 @@ public class ConfirmSender implements RabbitTemplate.ReturnCallback{
         sb.append(Integer.toString(++count));
         String message = sb.toString();
 
-        //        开启returncallback     yml 需要 配置    publisher-returns: true
         this.rabbitTemplate.setMandatory(true);
+        //为支持返回，mandatory为true，yml配置publisher-returns: true
         this.rabbitTemplate.setReturnCallback(this);
 
-        //        消息确认  yml 需要配置   publisher-returns: true
+        //确认消息 publisherConfirms yml需要配置true
         this.rabbitTemplate.setConfirmCallback(((correlationData, ack, cause) -> {
             if (!ack) {
                 System.out.println(" message send fail!,casue:" + cause + " correlationData :" + correlationData);
