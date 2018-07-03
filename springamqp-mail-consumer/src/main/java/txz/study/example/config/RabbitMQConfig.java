@@ -42,9 +42,9 @@ public class RabbitMQConfig {
     public CachingConnectionFactory cachingConnectionFactory() {
         CachingConnectionFactory cachFactory = new CachingConnectionFactory(connectionFactory());
         //开启发送失败退回
-        cachFactory.setPublisherReturns(true);
+        //cachFactory.setPublisherReturns(true);
         //发布消息确认
-        cachFactory.setPublisherConfirms(true);
+        //cachFactory.setPublisherConfirms(true);
         return cachFactory;
     }
 

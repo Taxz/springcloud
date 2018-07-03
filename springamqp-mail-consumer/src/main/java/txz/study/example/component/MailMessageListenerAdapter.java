@@ -13,14 +13,7 @@ import txz.study.example.model.MailMessageModel;
 import javax.annotation.Resource;
 import javax.mail.internet.MimeMessage;
 
-/**
- * <h3>概要:</h3><p>MailMessageListenerAdapter</p>
- * <h3>功能:</h3><p>Email服务监听适配器</p>
- * <h3>履历:</h3>
- * <li>2017年6月8日  v0.1 版本内容: 新建</li>
- * @author 粱桂钊
- * @since 0.1
- */
+
 @Component("mailMessageListenerAdapter")
 public class MailMessageListenerAdapter extends MessageListenerAdapter {
 
@@ -41,7 +34,7 @@ public class MailMessageListenerAdapter extends MessageListenerAdapter {
 			String to =  mailMessageModel.getTo();
 			String subject = mailMessageModel.getSubject();
 			String text = mailMessageModel.getText();
-			sendHtmlMail(to, subject, text);
+			//sendHtmlMail(to, subject, text);
 			// 手动ACK
 			channel.basicAck(message.getMessageProperties().getDeliveryTag(), false);
 		}catch (Exception e){
