@@ -40,7 +40,12 @@ public class RabbitMQConfig {
 
     @Bean
     public CachingConnectionFactory cachingConnectionFactory() {
-        return new CachingConnectionFactory(connectionFactory());
+        CachingConnectionFactory cachFactory = new CachingConnectionFactory(connectionFactory());
+        //开启发送失败退回
+        cachFactory.setPublisherReturns(true);
+        //发布消息确认
+        cachFactory.setPublisherConfirms(true);
+        return cachFactory;
     }
 
     @Bean
