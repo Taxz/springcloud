@@ -2,6 +2,9 @@
 交换器：与队列进行绑定，根据关键字路由，
 消费者：根据队列进行消费
 
+消息发送者：
+消息代理 broker：exchange + queue
+消息接受者：
 
 
 (Consumer) Delivery Acknowledgements：消费确认
@@ -71,8 +74,17 @@ When Consumers Fail or Lose Connection: Automatic Requeueing
 
 
 Publisher Confirms 发布者确认
+        消息确认情况：
+            1.不能路由的mandatory和immediate消息，在basic.return之后会被确认，
+            2.没有持久化的消息，入队就被确认；
+            3.持久化消息当写入磁盘或被每个队列都消费了，才会被确认；
+
         问题：丢包，延迟 问题
         方式1，可以用事务，但是降低吞吐量250倍
+            channel.txSelect();
+            channel.txCommit();
+            channel.txRollback();
+
         方式2，confirm mode,客户端发送confirm.select方法，依赖是否设置 no-wait，broker可能会响应confirm.select-ok，一旦confirm.select被用在通道上
         就被称为confirm mode，事务通道不能进入confirm mode，且confirm mode不能用事务，
         一旦通道是confirm mode，broke和client 都开始从第一次用confirm.select 从1开始计数统计消息，在同一个通道中，
@@ -99,7 +111,7 @@ Ordering Considerations for Publisher Confirms：
         这意味着，与各自的消息相比，确认可以以不同的顺序到达。 应用程序应尽可能不取决于确认的顺序。
 
 
-        如果代理在消息写入磁盘之前崩溃，代理将丢失持久性消息。 在某些情况下，这会导致经纪人以令人惊讶的方式行事。
+        如果代理在消息写入磁盘之前崩溃，代理将丢失持久性消息。 在某些情况下，这会导致broker以令人惊讶的方式行事。
 
 Delivery tag：
         递送标签是一个64位长的值，因此其最大值为9223372036854775807.由于递送标签的范围是按每个通道划分的，因此发布商或消费者在实践中不太可能超过该值。
