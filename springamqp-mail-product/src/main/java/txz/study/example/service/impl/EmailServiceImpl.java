@@ -27,7 +27,6 @@ public class EmailServiceImpl implements EmailService {
     private String routekey;
     @Override
     public void sendEmail(String name) {
-
         try {
             rabbitTemplate.convertAndSend(exchange, routekey, name);
         } catch (Exception e) {

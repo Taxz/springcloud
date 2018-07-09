@@ -2,6 +2,7 @@ package txz.study.example.springamqp.pulishconfirm;
 
 import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,7 +18,7 @@ public class ConfirmSender implements RabbitTemplate.ReturnCallback{
     private RabbitTemplate rabbitTemplate;
 
     @Autowired
-    private FanoutExchange fanout;
+    private TopicExchange topic;
 
     int dots = 0;
     int count = 0;
@@ -50,7 +51,7 @@ public class ConfirmSender implements RabbitTemplate.ReturnCallback{
             }
         }));
 
-        rabbitTemplate.convertAndSend(fanout.getName(),"",message);
+        rabbitTemplate.convertSendAndReceive(topic.getName(),"akey",message);
         System.out.println("sent: "+message);
     }
 

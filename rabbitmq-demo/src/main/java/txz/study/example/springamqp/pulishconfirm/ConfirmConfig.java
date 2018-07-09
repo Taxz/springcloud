@@ -29,19 +29,19 @@ public class ConfirmConfig {
      * @return
      */
     @Bean
-    FanoutExchange fanoutExchange() {
-        return new FanoutExchange("ABExchange");
+    TopicExchange topicExchange() {
+        return new TopicExchange("ABExchange");
     }
 
 
     @Bean
-    Binding bindingExchangeA(Queue QueueA, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(QueueA).to(fanoutExchange);
+    Binding bindingExchangeA(Queue QueueA, TopicExchange topicExchange) {
+        return BindingBuilder.bind(QueueA).to(topicExchange).with("akey");
     }
 
     @Bean
-    Binding bindingExchangeB(Queue QueueB, FanoutExchange fanoutExchange) {
-        return BindingBuilder.bind(QueueB).to(fanoutExchange);
+    Binding bindingExchangeB(Queue QueueB, TopicExchange topicExchange) {
+        return BindingBuilder.bind(QueueB).to(topicExchange).with("bkey");
     }
 
     @Bean

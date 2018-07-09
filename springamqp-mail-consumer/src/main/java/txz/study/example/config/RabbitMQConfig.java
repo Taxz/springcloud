@@ -7,6 +7,7 @@ import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.rabbit.listener.SimpleMessageListenerContainer;
+import org.springframework.amqp.rabbit.transaction.RabbitTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -60,13 +61,18 @@ public class RabbitMQConfig {
         return new RabbitAdmin(cachingConnectionFactory());
     }
 
+
+    public RabbitTransactionManager manager() {
+        return new RabbitTransactionManager(cachingConnectionFactory());
+    }
     @Bean
     public SimpleMessageListenerContainer listenerContainer(@Qualifier("mailMessageListenerAdapter") MailMessageListenerAdapter mailMessageListenerAdapter) {
         String queueNane = env.getProperty("mq.queue").trim();
         SimpleMessageListenerContainer simpleMessageListenerContainer = new SimpleMessageListenerContainer(cachingConnectionFactory());
         simpleMessageListenerContainer.setQueueNames(queueNane);
         simpleMessageListenerContainer.setMessageListener(mailMessageListenerAdapter);
-
+        //simpleMessageListenerContainer.setTransactionManager(manager());
+        //  simpleMessageListenerContainer.setChannelTransacted(true);
         simpleMessageListenerContainer.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         return simpleMessageListenerContainer;
 

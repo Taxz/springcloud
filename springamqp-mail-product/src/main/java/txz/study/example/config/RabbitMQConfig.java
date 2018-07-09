@@ -51,11 +51,11 @@ public class RabbitMQConfig {
     public RabbitTemplate rabbitTemplate() {
         RabbitTemplate rabbitTemplate = new RabbitTemplate(cachingConnectionFactory());
         rabbitTemplate.setChannelTransacted(true);
-        rabbitTemplate.setMandatory(true);
+       // rabbitTemplate.setMandatory(true);
         return rabbitTemplate;
     }
 
-    @Bean
+    //@Bean
     public AmqpAdmin amqpAdmin() {
         return new RabbitAdmin(cachingConnectionFactory());
     }
