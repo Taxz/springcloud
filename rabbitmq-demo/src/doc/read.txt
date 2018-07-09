@@ -84,6 +84,11 @@ Publisher Confirms 发布者确认
             channel.txSelect();
             channel.txCommit();
             channel.txRollback();
+            四个步骤：
+            client发送Tx.Select
+            broker发送Tx.Select-Ok(之后publish)
+            client发送Tx.Commit
+            broker发送Tx.Commit-Ok
 
         方式2，confirm mode,客户端发送confirm.select方法，依赖是否设置 no-wait，broker可能会响应confirm.select-ok，一旦confirm.select被用在通道上
         就被称为confirm mode，事务通道不能进入confirm mode，且confirm mode不能用事务，
@@ -120,3 +125,13 @@ Delivery tag：
 
 声明一个队列是幂等的，如果不存在就重新创建，channel.queueDeclare(QUEUE_NAME, false, false, false, null);
         Declaring a queue is idempotent - it will only be created if it doesn't exist already. The message content is a byte array,
+
+ConnectionFactory:
+    ConnectionFactory实现的职责是提供org.springframework.amqp.rabbit.connection.Connection的实例，它是com.rabbitmq.client.Connection的封装。
+    提供的唯一具体实现是CachingConnectionFactory，默认情况下，它建立一个可由应用程序共享的单个连接代理。 共享连接是可能的，因为与AMQP进行消息传递的“工作单元”实际上是一个“通道”
+    （在某些方面，这类似于JMS中Connection和Session之间的关系）。 可以想象，连接实例提供了createChannel方法。 CachingConnectionFactory实现支持对这些通道进行缓存，并根据通道是否为事务性为通道维护单独的缓存。 在创建CachingConnectionFactory的实例时，可以通过构造函数提供主机名。 还应提供用户名和密码属性。 如果要配置通道缓存的大小（默认值为25），也可以在此处调用setChannelCacheSize（）方法。
+
+    connectionLimit：设置此项时，会限制允许的连接总数。设置时，如果达到限制，channelCheckoutTimeLimit则用于等待连接变为空闲状态时间。如果超过时间，AmqpTimeoutException则抛出。
+
+LocalizedQueueConnectionFactory：
+    虽然CachingConnectionFactory可以配置多个代理地址; 这是故障转移，客户端将尝试按顺序连接。在LocalizedQueueConnectionFactory使用由管理员提供的插件，以确定哪个节点队列掌握了REST API。然后它创建（或从缓存中检索）CachingConnectionFactory将连接到该节点的a。如果连接失败，则确定新的主节点并且消费者连接到它。如果LocalizedQueueConnectionFactory无法确定队列的物理位置，则配置默认连接工厂，在这种情况下，它将正常连接到群集。
